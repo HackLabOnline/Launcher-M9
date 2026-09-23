@@ -24,6 +24,13 @@
 #include <cardkb2.h>
 #endif
 
+#if defined(THINKNODE_M9)
+  #include "hal/thinknode_m9_hal.hpp"
+  #include "keyboard/keyboard_thinknode_m9.h"
+  LGFX_ThinkNodeM9 tft;
+  ThinkNodeKeyboard keyboard;
+#endif
+
 #if defined(SET_LOOP_TASK_STACK_SIZE)
 SET_LOOP_TASK_STACK_SIZE(16384)
 #endif
@@ -183,6 +190,10 @@ void _late_setup_gpio() {}
 void setup() {
     Serial.setRxBufferSize(8192);
     Serial.begin(115200);
+    #if defined(THINKNODE_M9)
+    setup_hal();
+  #endif
+
 #if ARDUINO_USB_CDC_ON_BOOT
     Serial.setTxTimeoutMs(0);
 #endif
@@ -445,6 +456,9 @@ void loop() {
                                          [=]() { loopSD(false); },
                                          sdcardMounted},
 #endif
+#if defined(THINKNODE_M9)
+    poll_inputs();
+  #endif
 #ifndef DISABLE_OTA
         {"OTA", "Online Installer", [=]() { ota_function(); }},
 #endif

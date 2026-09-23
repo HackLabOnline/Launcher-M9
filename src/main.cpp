@@ -25,10 +25,7 @@
 #endif
 
 #if defined(THINKNODE_M9)
-  #include "hal/thinknode_m9_hal.hpp"
   #include "keyboard/keyboard_thinknode_m9.h"
-  LGFX_ThinkNodeM9 tft;
-  ThinkNodeKeyboard keyboard;
 #endif
 
 #if defined(SET_LOOP_TASK_STACK_SIZE)
@@ -191,8 +188,19 @@ void setup() {
     Serial.setRxBufferSize(8192);
     Serial.begin(115200);
     #if defined(THINKNODE_M9)
-    setup_hal();
-  #endif
+    // 1. Power Gate & Backlight ON
+    pinMode(18, OUTPUT); digitalWrite(18, HIGH); // VDD_PERIPH_EN
+    pinMode(17, OUTPUT); digitalWrite(17, HIGH); // LCD Backlight
+    delay(50);
+
+    // 2. Isolate LoRa & SD SPI bus
+    pinMode(39, OUTPUT); digitalWrite(39, HIGH); // LoRa NSS
+    pinMode(34, OUTPUT); digitalWrite(34, HIGH); // SD CS
+    pinMode(10, OUTPUT); digitalWrite(10, HIGH); // TFT CS
+
+    // 3. Initialize Keyboard
+    ThinkNodeKeyboard::begin();
+#endif
 
 #if ARDUINO_USB_CDC_ON_BOOT
     Serial.setTxTimeoutMs(0);

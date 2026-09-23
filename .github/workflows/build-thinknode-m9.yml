@@ -30,14 +30,26 @@ jobs:
         run: |
           pio run -e thinknode-m9
 
-      - name: Create Monolithic 16MB Factory Binary
+      - name: Merge Binaries
         run: |
-          esptool.py --chip esp32s3 merge_bin -o M5Launcher_ThinkNode_M9_FACTORY_16MB.bin \
-            --flash_mode qio --flash_freq 80m --flash_size 16MB \
+          BOOT_APP0=$(find /home/runner -name "boot_app0.bin" 2>/dev/null | head -n 1)
+          echo "Found boot_app0 at: $BOOT_APP0"
+
+          python -m esptool --chip esp32s3 merge_bin \
+            --flash_mode dio \
+            --flash_freq 80m \
+            --flash_size 16MB \
+            -o M5Launcher_ThinkNode_M9_FACTORY_16MB.bin \
             0x0000 .pio/build/thinknode-m9/bootloader.bin \
             0x8000 .pio/build/thinknode-m9/partitions.bin \
-            0xe000 ~/.platformio/packages/framework-arduinoespressif32/tools/partitions/boot_app0.bin \
+            0xe000 "$BOOT_APP0" \
             0x10000 .pio/build/thinknode-m9/firmware.bin
+
+      - name: Upload Flashable Firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: M5Launcher_ThinkNode_M9_Binary
+          path: M5Launcher_ThinkNode_M9_FACTORY_16MB.bin
 
       - name: Upload Real Compiled Binaries as Artifacts
         uses: actions/upload-artifact@v4

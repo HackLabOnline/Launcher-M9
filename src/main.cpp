@@ -456,9 +456,7 @@ void loop() {
                                          [=]() { loopSD(false); },
                                          sdcardMounted},
 #endif
-#if defined(THINKNODE_M9)
-    poll_inputs();
-  #endif
+
 #ifndef DISABLE_OTA
         {"OTA", "Online Installer", [=]() { ota_function(); }},
 #endif
